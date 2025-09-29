@@ -70,6 +70,11 @@ else
     echo -e "${GREEN}✅ .env file already exists${NC}"
 fi
 
+# Make monitor script executable
+echo -e "${BLUE}🔧 Setting up permissions...${NC}"
+chmod +x monitor
+chmod +x scripts/monitor.sh
+
 # Setup secrets
 echo -e "${BLUE}🔐 Setting up secrets...${NC}"
 ./monitor setup
