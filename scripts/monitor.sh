@@ -208,7 +208,7 @@ setup_security() {
     fi
     
     # Set proper permissions
-    chown -R $(id -u):$(id -g) "${SECRETS_DIR}"
+    # chown -R $(id -u):$(id -g) "${SECRETS_DIR}"  # Commented out to avoid permission issues
     
     echo -e "${GREEN}🔒 Secrets setup completed!${NC}"
     echo -e "${YELLOW}💡 Security tips:${NC}"
