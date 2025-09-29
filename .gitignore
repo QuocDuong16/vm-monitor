@@ -12,7 +12,7 @@ secrets/
 *.p12
 
 # Docker
-.dockerignore
+# .dockerignore  # Commented out - needed for Docker builds
 
 # Logs
 *.log
