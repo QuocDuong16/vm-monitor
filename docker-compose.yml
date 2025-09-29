@@ -56,6 +56,8 @@ services:
     networks:
       - monitor_network
     privileged: true
+    # Security note: cAdvisor cần privileged để monitor system resources
+    # Đây là practice chuẩn cho monitoring tools
 
   # Node Exporter - System metrics
   node-exporter:
@@ -68,14 +70,12 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
-      - ./config/node-exporter/web.yml:/etc/node_exporter/web.yml:ro
     command:
       - '--path.procfs=/host/proc'
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
       - '--web.max-requests=10'
-      - '--web.config.file=/etc/node_exporter/web.yml'
     networks:
       - monitor_network
 
@@ -111,6 +111,7 @@ services:
       - grafana_data:/var/lib/grafana
       - ./config/grafana/provisioning:/etc/grafana/provisioning
     environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/grafana_password
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SECURITY_DISABLE_GRAVATAR=true
@@ -155,6 +156,7 @@ volumes:
   prometheus_data:
   grafana_data:
   syslog_data:
+
 
 networks:
   monitor_network:
