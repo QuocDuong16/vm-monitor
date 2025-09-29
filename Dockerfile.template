@@ -1,0 +1,79 @@
+# syntax=docker/dockerfile:1.6
+# Multi-stage build template for secure Docker images
+
+# Stage 1: Builder (if needed for compilation)
+FROM alpine:3.19 AS builder
+
+# Install build dependencies
+RUN apk add --no-cache \
+    build-base \
+    git \
+    && rm -rf /var/cache/apk/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy only necessary files for build
+COPY package*.json ./
+COPY src/ ./src/
+
+# Use BuildKit secrets for sensitive data
+RUN --mount=type=secret,id=NPM_TOKEN \
+    if [ -f .npmrc ]; then \
+        NPM_TOKEN=$(cat /run/secrets/NPM_TOKEN) && \
+        echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc; \
+    fi
+
+# Install dependencies
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Build application (if needed)
+# RUN npm run build
+
+# Stage 2: Runtime (minimal final image)
+FROM alpine:3.19 AS runtime
+
+# Create non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
+
+# Install only runtime dependencies
+RUN apk add --no-cache \
+    nodejs \
+    npm \
+    dumb-init \
+    && rm -rf /var/cache/apk/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy only built artifacts from builder stage
+COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
+COPY --from=builder --chown=appuser:appgroup /app/package*.json ./
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/logs /app/tmp && \
+    chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose port (if needed)
+EXPOSE 3000
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Default command
+CMD ["node", "dist/index.js"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node healthcheck.js || exit 1
+
+# Labels for metadata (no secrets here)
+LABEL maintainer="your-email@example.com"
+LABEL version="1.0.0"
+LABEL description="Secure monitoring application"

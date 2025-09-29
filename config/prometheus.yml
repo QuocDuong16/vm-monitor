@@ -1,0 +1,44 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter - VM1 system metrics
+  - job_name: 'node-exporter-vm1'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 5s
+
+  # cAdvisor - Container metrics
+  - job_name: 'cadvisor-vm1'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 5s
+
+  # VM2 monitoring via Tailscale (sẽ được cấu hình sau khi kết nối)
+  - job_name: 'node-exporter-vm2'
+    static_configs:
+      - targets: ['${VM2_TAILSCALE_HOST}:9100']
+    scrape_interval: 5s
+    metrics_path: /metrics
+
+  - job_name: 'cadvisor-vm2'
+    static_configs:
+      - targets: ['${VM2_TAILSCALE_HOST}:8080']
+    scrape_interval: 5s
+    metrics_path: /metrics
+
+  # Portainer metrics (nếu có)
+  - job_name: 'portainer'
+    static_configs:
+      - targets: ['portainer:9000']
+    metrics_path: /api/status
+    scrape_interval: 30s

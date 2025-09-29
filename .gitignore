@@ -1,0 +1,48 @@
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
+
+# Secrets directory
+secrets/
+*.key
+*.pem
+*.crt
+*.p12
+
+# Docker
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# Data directories
+*_data/
+
+# Backups
+backups/
+*.tar.gz
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Monitor daemon
+monitor-daemon.pid
+
+# Test files
+test-results/

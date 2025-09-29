@@ -1,0 +1,162 @@
+version: '3.8'
+
+# Define secrets
+secrets:
+  grafana_password:
+    file: ./secrets/grafana_password.txt
+  cloudflare_token:
+    file: ./secrets/cloudflare_token.txt
+
+services:
+  # Portainer - Quản lý Docker containers
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - monitor_network
+    environment:
+      - PORTAINER_HTTP_ENABLED=true
+    command: --http-enabled
+    # Security: Run as non-root user
+    user: "1000:1000"
+
+  # Cloudflared - Tunnel để truy cập từ xa (tùy chọn)
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token /run/secrets/cloudflare_token
+    networks:
+      - monitor_network
+    secrets:
+      - cloudflare_token
+    profiles:
+      - cloudflare
+    # Security: Run as non-root user
+    user: "1000:1000"
+
+  # cAdvisor - Container monitoring
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    networks:
+      - monitor_network
+    privileged: true
+
+  # Node Exporter - System metrics
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - monitor_network
+
+  # Prometheus - Metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus/alerts.yml:/etc/prometheus/alerts.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - monitor_network
+
+  # Grafana - Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/grafana_password
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_DISABLE_GRAVATAR=true
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+    secrets:
+      - grafana_password
+    networks:
+      - monitor_network
+    # Security: Run as non-root user
+    user: "472:472"
+
+  # Syslog server
+  syslog:
+    image: balabit/syslog-ng:latest
+    container_name: syslog
+    restart: unless-stopped
+    ports:
+      - "514:514/udp"
+      - "601:601/tcp"
+    volumes:
+      - ./config/syslog/syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+      - syslog_data:/var/log/syslog-ng
+    networks:
+      - monitor_network
+
+  # Watchtower - Auto update containers
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=300
+    networks:
+      - monitor_network
+
+volumes:
+  portainer_data:
+  prometheus_data:
+  grafana_data:
+  syslog_data:
+
+networks:
+  monitor_network:
+    driver: bridge
