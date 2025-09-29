@@ -170,6 +170,12 @@ setup_security() {
     mkdir -p "${SECRETS_DIR}"
     chmod 700 "${SECRETS_DIR}"
     
+    # Fix permissions for Grafana secrets
+    if [ -f "${SECRETS_DIR}/grafana_password.txt" ]; then
+        sudo chown 472:472 "${SECRETS_DIR}/grafana_password.txt"
+        echo -e "${GREEN}✅ Fixed Grafana password permissions${NC}"
+    fi
+    
     # Check if .env file exists
     if [ ! -f .env ]; then
         echo -e "${YELLOW}⚠️  .env file not found. Please create it from .env.example${NC}"

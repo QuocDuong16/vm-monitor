@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Define secrets
 secrets:
   grafana_password:
