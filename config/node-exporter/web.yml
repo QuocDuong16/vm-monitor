@@ -1,0 +1,6 @@
+# Node Exporter web configuration
+# Giới hạn số lượng request đồng thời để tránh lỗi connection reset
+http:
+  server_read_timeout: 30s
+  server_write_timeout: 30s
+  server_idle_timeout: 60s

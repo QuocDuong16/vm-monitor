@@ -68,11 +68,14 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+      - ./config/node-exporter/web.yml:/etc/node_exporter/web.yml:ro
     command:
       - '--path.procfs=/host/proc'
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--web.max-requests=10'
+      - '--web.config.file=/etc/node_exporter/web.yml'
     networks:
       - monitor_network
 

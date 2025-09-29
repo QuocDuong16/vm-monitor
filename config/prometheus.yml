@@ -36,9 +36,5 @@ scrape_configs:
     scrape_interval: 5s
     metrics_path: /metrics
 
-  # Portainer metrics (nếu có)
-  - job_name: 'portainer'
-    static_configs:
-      - targets: ['portainer:9000']
-    metrics_path: /api/status
-    scrape_interval: 30s
+  # Portainer không có Prometheus metrics endpoint
+  # Sử dụng cAdvisor để monitor container Portainer thay thế

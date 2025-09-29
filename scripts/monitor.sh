@@ -136,7 +136,13 @@ show_status() {
     # Kiểm tra ports
     echo ""
     echo -e "${BLUE}🌐 Ports đang lắng nghe:${NC}"
-    netstat -tulpn | grep -E ":(3000|8080|9000|9090|9100|9443)" || echo "Không có ports nào đang lắng nghe"
+    if command -v netstat >/dev/null 2>&1; then
+        netstat -tulpn | grep -E ":(3000|8080|9000|9090|9100|9443)" || echo "Không có ports nào đang lắng nghe"
+    elif command -v ss >/dev/null 2>&1; then
+        ss -tulpn | grep -E ":(3000|8080|9000|9090|9100|9443)" || echo "Không có ports nào đang lắng nghe"
+    else
+        echo "Không thể kiểm tra ports (netstat và ss không có sẵn)"
+    fi
     
     # Kiểm tra logs gần đây
     echo ""
