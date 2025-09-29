@@ -45,7 +45,7 @@ check_docker() {
         exit 1
     fi
 
-    if ! command -v docker-compose &> /dev/null; then
+    if ! docker compose version &> /dev/null; then
         echo -e "${RED}❌ Docker Compose chưa được cài đặt!${NC}"
         exit 1
     fi
@@ -80,7 +80,7 @@ start_system() {
     
     # Khởi động stack
     echo -e "${BLUE}🐳 Khởi động Docker containers...${NC}"
-    docker-compose up -d
+    docker compose up -d
     
     # Kiểm tra trạng thái
     echo -e "${BLUE}⏳ Đang kiểm tra trạng thái services...${NC}"
@@ -88,7 +88,7 @@ start_system() {
     
     # Hiển thị trạng thái
     echo -e "${GREEN}📊 Trạng thái các services:${NC}"
-    docker-compose ps
+    docker compose ps
     
     echo ""
     echo -e "${GREEN}✅ Hệ thống Monitor VM1 đã khởi động thành công!${NC}"
@@ -103,17 +103,17 @@ start_system() {
 
 stop_system() {
     echo -e "${YELLOW}🛑 Đang dừng hệ thống Monitor VM1...${NC}"
-    docker-compose down
+    docker compose down
     echo -e "${GREEN}✅ Hệ thống Monitor VM1 đã dừng thành công!${NC}"
 }
 
 restart_system() {
     echo -e "${YELLOW}🔄 Đang restart hệ thống Monitor VM1...${NC}"
-    docker-compose restart
+    docker compose restart
     echo -e "${BLUE}⏳ Đang kiểm tra trạng thái services...${NC}"
     sleep 5
     echo -e "${GREEN}📊 Trạng thái các services:${NC}"
-    docker-compose ps
+    docker compose ps
     echo -e "${GREEN}✅ Hệ thống Monitor VM1 đã restart thành công!${NC}"
 }
 
@@ -126,7 +126,7 @@ show_status() {
     # Trạng thái containers
     echo ""
     echo -e "${BLUE}🐳 Trạng thái Containers:${NC}"
-    docker-compose ps
+    docker compose ps
     
     # Sử dụng tài nguyên
     echo ""
@@ -141,7 +141,7 @@ show_status() {
     # Kiểm tra logs gần đây
     echo ""
     echo -e "${BLUE}📝 Logs gần đây (5 dòng cuối):${NC}"
-    docker-compose logs --tail=5
+    docker compose logs --tail=5
     
     # Kiểm tra kết nối VM2 qua Tailscale (nếu có)
     if [ -f .env ]; then
@@ -350,10 +350,10 @@ cleanup_system() {
     fi
     
     echo -e "${YELLOW}🗑️  Đang dừng và xóa containers...${NC}"
-    docker-compose down -v
+    docker compose down -v
     
     echo -e "${YELLOW}🗑️  Đang xóa images...${NC}"
-    docker-compose down --rmi all
+    docker compose down --rmi all
     
     echo -e "${YELLOW}🗑️  Đang xóa volumes...${NC}"
     docker volume prune -f
@@ -439,7 +439,7 @@ backup_system() {
     
     # Stop system for consistent backup
     echo -e "${YELLOW}🛑 Stopping system for backup...${NC}"
-    docker-compose down
+    docker compose down
     
     # Create backup
     echo -e "${BLUE}📦 Creating backup archive...${NC}"
@@ -453,7 +453,7 @@ backup_system() {
     
     # Restart system
     echo -e "${GREEN}🚀 Restarting system...${NC}"
-    docker-compose up -d
+    docker compose up -d
     
     echo -e "${GREEN}✅ Backup completed: ${BACKUP_DIR}/${BACKUP_FILE}${NC}"
     echo -e "${BLUE}💡 To restore: $0 restore ${BACKUP_FILE}${NC}"
@@ -484,13 +484,13 @@ restore_system() {
     fi
     
     echo -e "${YELLOW}🛑 Stopping system...${NC}"
-    docker-compose down
+    docker compose down
     
     echo -e "${BLUE}📦 Extracting backup...${NC}"
     tar -xzf "backups/${backup_file}"
     
     echo -e "${GREEN}🚀 Starting system...${NC}"
-    docker-compose up -d
+    docker compose up -d
     
     echo -e "${GREEN}✅ Restore completed!${NC}"
 }
@@ -500,11 +500,11 @@ update_system() {
     
     # Pull latest images
     echo -e "${BLUE}📦 Pulling latest images...${NC}"
-    docker-compose pull
+    docker compose pull
     
     # Restart with new images
     echo -e "${BLUE}🚀 Restarting with updated images...${NC}"
-    docker-compose up -d
+    docker compose up -d
     
     # Clean up old images
     echo -e "${BLUE}🧹 Cleaning up old images...${NC}"
@@ -512,7 +512,7 @@ update_system() {
     
     echo -e "${GREEN}✅ Update completed!${NC}"
     echo -e "${BLUE}📊 Current status:${NC}"
-    docker-compose ps
+    docker compose ps
 }
 
 show_logs() {
@@ -520,10 +520,10 @@ show_logs() {
     
     if [ -z "$service" ]; then
         echo -e "${BLUE}📝 Showing logs for all services...${NC}"
-        docker-compose logs -f
+        docker compose logs -f
     else
         echo -e "${BLUE}📝 Showing logs for $service...${NC}"
-        docker-compose logs -f "$service"
+        docker compose logs -f "$service"
     fi
 }
 

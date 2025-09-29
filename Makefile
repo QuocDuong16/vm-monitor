@@ -58,26 +58,26 @@ health: ## Run health checks
 	@./scripts/health-check.sh
 
 logs: ## Show logs for all services
-	@docker-compose logs -f
+	@docker compose logs -f
 
 logs-prometheus: ## Show Prometheus logs
-	@docker-compose logs -f prometheus
+	@docker compose logs -f prometheus
 
 logs-grafana: ## Show Grafana logs
-	@docker-compose logs -f grafana
+	@docker compose logs -f grafana
 
 logs-portainer: ## Show Portainer logs
-	@docker-compose logs -f portainer
+	@docker compose logs -f portainer
 
 update: ## Update all Docker images
-	@docker-compose pull
-	@docker-compose up -d
+	@docker compose pull
+	@docker compose up -d
 
 dev: ## Start in development mode
-	@docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+	@docker compose -f docker compose.yml -f docker compose.override.yml up -d
 
 prod: ## Start in production mode
-	@docker-compose -f docker-compose.yml up -d
+	@docker compose -f docker compose.yml up -d
 
 # Quick setup for new users
 quick-start: install start status ## Quick start for new users

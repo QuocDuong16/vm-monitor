@@ -49,10 +49,14 @@ else
 fi
 
 # Install Docker Compose if not present
-if ! command -v docker-compose &> /dev/null; then
+if ! docker compose version &> /dev/null; then
     echo -e "${BLUE}📦 Installing Docker Compose...${NC}"
-    sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
+    # Docker Compose is now included with Docker Desktop and newer Docker installations
+    # For older systems, install docker-compose (legacy)
+    if ! command -v docker-compose &> /dev/null; then
+        sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+    fi
 else
     echo -e "${GREEN}✅ Docker Compose already installed${NC}"
 fi

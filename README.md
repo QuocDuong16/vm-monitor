@@ -45,8 +45,10 @@ sudo sh get-docker.sh
 sudo usermod -aG docker $USER
 
 # Cài đặt Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+# Docker Compose is now included with Docker Desktop and newer Docker installations
+# For older systems, install docker compose (legacy):
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker compose
+sudo chmod +x /usr/local/bin/docker compose
 
 # 2. Thiết lập bảo mật
 cp env.example .env
@@ -69,7 +71,7 @@ cp env.example .env
 1. Đăng nhập Cloudflare Dashboard
 2. Tạo tunnel mới
 3. Copy token và cập nhật vào file `.env`
-4. Khởi động với profile: `docker-compose --profile cloudflare up -d`
+4. Khởi động với profile: `docker compose --profile cloudflare up -d`
 
 ## 📊 Truy cập Services
 
@@ -110,17 +112,17 @@ cp env.example .env
 ### Quản lý Docker
 ```bash
 # Xem logs
-docker-compose logs -f
+docker compose logs -f
 
 # Xem trạng thái
 ./monitor status
 
 # Restart service cụ thể
-docker-compose restart portainer
+docker compose restart portainer
 
 # Cập nhật images
-docker-compose pull
-docker-compose up -d
+docker compose pull
+docker compose up -d
 ```
 
 ## 🔗 Kết nối VM2
@@ -148,8 +150,8 @@ docker-compose up -d
 
 ```
 monitor-vm1/
-├── docker-compose.yml          # Stack chính
-├── docker-compose.override.yml # Override cho development
+├── docker compose.yml          # Stack chính
+├── docker compose.override.yml # Override cho development
 ├── .dockerignore               # Loại trừ file nhạy cảm
 ├── .gitignore                  # Git ignore rules
 ├── env.example                 # Template cấu hình
@@ -244,11 +246,11 @@ make test          # Test hệ thống
 ### Kiểm tra logs
 ```bash
 # Tất cả services
-docker-compose logs
+docker compose logs
 
 # Service cụ thể
-docker-compose logs portainer
-docker-compose logs prometheus
+docker compose logs portainer
+docker compose logs prometheus
 ```
 
 ### Kiểm tra kết nối
