@@ -188,6 +188,9 @@ setup_security() {
     
     # Create Grafana password file
     if [ -n "${GRAFANA_PASSWORD:-}" ]; then
+        # Remove existing file first
+        sudo rm -f "${SECRETS_DIR}/grafana_password.txt"
+        # Create new file with correct ownership
         echo "${GRAFANA_PASSWORD}" | sudo tee "${SECRETS_DIR}/grafana_password.txt" > /dev/null
         sudo chmod 600 "${SECRETS_DIR}/grafana_password.txt"
         sudo chown 472:472 "${SECRETS_DIR}/grafana_password.txt"
