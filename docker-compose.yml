@@ -79,7 +79,6 @@ services:
       - '--web.max-requests=5'
       - '--web.config.file=/etc/node_exporter/web.yml'
       - '--web.listen-address=0.0.0.0:9100'
-      - '--web.timeout-offset=5s'
       - '--collector.systemd'
       - '--collector.systemd.unit-whitelist=(docker|ssh|nginx|mysql|postgresql).service'
     networks:
@@ -154,10 +153,13 @@ services:
     # Fix capability issues in container
     cap_add:
       - SYSLOG
+      - DAC_OVERRIDE
     security_opt:
       - no-new-privileges:false
     environment:
       - SYSLOGNG_OPTS=--no-caps
+    # Run with minimal privileges
+    user: "0:0"
 
   # Watchtower - Auto update containers
   watchtower:
