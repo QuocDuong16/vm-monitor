@@ -172,7 +172,7 @@ setup_security() {
     
     # Fix permissions for existing Grafana secrets
     if [ -f "${SECRETS_DIR}/grafana_password.txt" ]; then
-        sudo chown 472:472 "${SECRETS_DIR}/grafana_password.txt"
+        sudo chown 472:472 "${SECRETS_DIR}/grafana_password.txt" 2>/dev/null || true
         sudo chmod 600 "${SECRETS_DIR}/grafana_password.txt"
         echo -e "${GREEN}✅ Fixed Grafana password permissions${NC}"
     fi
@@ -193,7 +193,7 @@ setup_security() {
         # Create new file with correct ownership
         echo "${GRAFANA_PASSWORD}" | sudo tee "${SECRETS_DIR}/grafana_password.txt" > /dev/null
         sudo chmod 600 "${SECRETS_DIR}/grafana_password.txt"
-        sudo chown 472:472 "${SECRETS_DIR}/grafana_password.txt"
+        sudo chown 472:472 "${SECRETS_DIR}/grafana_password.txt" 2>/dev/null || true
         echo -e "${GREEN}✅ Created grafana_password.txt${NC}"
     else
         echo -e "${RED}❌ GRAFANA_PASSWORD not found in .env${NC}"
