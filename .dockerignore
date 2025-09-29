@@ -42,7 +42,7 @@ Thumbs.db
 # Docker
 Dockerfile*
 docker-compose*.yml
-.dockerignore
+# .dockerignore  # Commented out - don't ignore self
 
 # Scripts
 scripts/
