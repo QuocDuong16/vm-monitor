@@ -70,14 +70,26 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+      - ./config/node-exporter/web.yml:/etc/node_exporter/web.yml:ro
     command:
       - '--path.procfs=/host/proc'
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-      - '--web.max-requests=10'
+      - '--web.max-requests=5'
+      - '--web.config.file=/etc/node_exporter/web.yml'
+      - '--web.listen-address=0.0.0.0:9100'
+      - '--web.timeout-offset=5s'
+      - '--collector.systemd'
+      - '--collector.systemd.unit-whitelist=(docker|ssh|nginx|mysql|postgresql).service'
     networks:
       - monitor_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9100/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   # Prometheus - Metrics collection
   prometheus:
@@ -117,6 +129,8 @@ services:
       - GF_SECURITY_DISABLE_GRAVATAR=true
       - GF_ANALYTICS_REPORTING_ENABLED=false
       - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      - GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
     secrets:
       - grafana_password
     networks:
@@ -137,6 +151,13 @@ services:
       - syslog_data:/var/log/syslog-ng
     networks:
       - monitor_network
+    # Fix capability issues in container
+    cap_add:
+      - SYSLOG
+    security_opt:
+      - no-new-privileges:false
+    environment:
+      - SYSLOGNG_OPTS=--no-caps
 
   # Watchtower - Auto update containers
   watchtower:
