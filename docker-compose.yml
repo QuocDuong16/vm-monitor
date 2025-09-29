@@ -19,13 +19,12 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+    user: "root"
     networks:
       - monitor_network
     environment:
       - PORTAINER_HTTP_ENABLED=true
     command: --http-enabled
-    # Security: Run as non-root user
-    user: "1000:1000"
 
   # Cloudflared - Tunnel để truy cập từ xa (tùy chọn)
   cloudflared:
